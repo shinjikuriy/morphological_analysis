@@ -218,7 +218,10 @@ async function main() {
     // Write output files
     await writeOutput(baseName, summarizedWords, result.kanjiList, format)
   } catch (error) {
-    console.error('エラーが発生しました:', error instanceof Error ? error.message : error)
+    console.error(
+      'エラーが発生しました:',
+      error instanceof Error ? error.message : error
+    )
     process.exit(1)
   }
 }
