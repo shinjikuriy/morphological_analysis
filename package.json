@@ -4,7 +4,8 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "analyze": "bun run src/index.ts"
+    "analyze": "bun run src/index.ts",
+    "dev": "bun run src/server.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -14,6 +15,7 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "kuromoji": "^0.1.2"
+    "kuromoji": "^0.1.2",
+    "preact": "^10.26.8"
   }
 }
