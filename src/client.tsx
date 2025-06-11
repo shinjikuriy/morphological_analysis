@@ -5,6 +5,7 @@ import type { AnalysisResult } from './types'
 function App() {
   const [text, setText] = useState('')
   const [result, setResult] = useState<AnalysisResult | null>(null)
+  const [tooltip, setTooltip] = useState<{ text: string; x: number; y: number } | null>(null)
   const formId = useId()
   const inputId = useId()
 
@@ -31,6 +32,20 @@ function App() {
     }
   }
 
+  const handleTokenHover = (e: MouseEvent, token: any) => {
+    const target = e.currentTarget as HTMLElement
+    const rect = target.getBoundingClientRect()
+    setTooltip({
+      text: JSON.stringify(token, null, 2),
+      x: rect.left,
+      y: rect.bottom + window.scrollY
+    })
+  }
+
+  const handleTokenLeave = () => {
+    setTooltip(null)
+  }
+
   return (
     <>
       <style>
@@ -43,7 +58,20 @@ function App() {
             display: block;
             width: 30em;
             height: 10em;
-            
+          }
+          .token {
+            cursor: help;
+          }
+          .tooltip {
+            position: absolute;
+            background: #333;
+            color: white;
+            padding: 0.5em;
+            border-radius: 4px;
+            font-size: 0.9em;
+            z-index: 1000;
+            max-width: 300px;
+            white-space: pre-wrap;
           }
         `}
       </style>
@@ -64,7 +92,14 @@ function App() {
             <h2>Tokens</h2>
             <div class='tokens'>
               {result.tokenList.map((token, index) => (
-                <span key={index}>{token.basic_form}</span>
+                <span
+                  key={index}
+                  class='token'
+                  onMouseEnter={(e) => handleTokenHover(e, token)}
+                  onMouseLeave={handleTokenLeave}
+                >
+                  {token.basic_form}
+                </span>
               ))}
             </div>
             <h2>Content Words</h2>
@@ -79,6 +114,17 @@ function App() {
                 <span key={index}>{kanji.kanji}</span>
               ))}
             </div>
+          </div>
+        )}
+        {tooltip && (
+          <div
+            class='tooltip'
+            style={{
+              left: `${tooltip.x}px`,
+              top: `${tooltip.y}px`
+            }}
+          >
+            {tooltip.text}
           </div>
         )}
       </div>
