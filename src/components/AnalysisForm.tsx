@@ -1,7 +1,11 @@
-import { useState, useId } from 'preact/hooks'
+import { useState, useId, useEffect } from 'preact/hooks'
 import type { AnalysisResult } from '../types'
 
-export function AnalysisForm() {
+interface AnalysisFormProps {
+  onResultChange?: (result: AnalysisResult | null) => void
+}
+
+export function AnalysisForm({ onResultChange }: AnalysisFormProps) {
   const [text, setText] = useState('')
   const [result, setResult] = useState<AnalysisResult | null>(null)
   const [tooltip, setTooltip] = useState<{
@@ -11,6 +15,10 @@ export function AnalysisForm() {
   } | null>(null)
   const formId = useId()
   const inputId = useId()
+
+  useEffect(() => {
+    onResultChange?.(result)
+  }, [result])
 
   const handleChange = (e: Event) => {
     setText((e.target as HTMLTextAreaElement).value)
