@@ -1,8 +1,8 @@
 import { render } from 'preact'
 import { useState } from 'preact/hooks'
 import { AnalysisForm } from './components/AnalysisForm'
-import { AcquiredItemForm } from './components/acquiredItemForm'
 import type { AnalysisResult } from './types'
+import { AcquiredItemForm } from './components/AcquiredItemForm'
 
 function App() {
   const [formResults, setFormResults] = useState<(AnalysisResult | null)[]>([
