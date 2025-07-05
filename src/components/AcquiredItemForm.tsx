@@ -27,6 +27,7 @@ export function AcquiredItemForm({
       .filter((char, index, array) => array.indexOf(char) === index) // Remove duplicates
 
     onAcquiredKanjiChange(kanjiArray)
+    setKanjiInput('') // Clear the input after saving
   }
 
   const handleWordsSubmit = async (e: Event) => {
