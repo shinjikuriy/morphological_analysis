@@ -16,15 +16,28 @@ const tokenizer = await new Promise<
 export default function analyze(text: string): AnalysisResult {
   // Tokenize the text
   const tokens = tokenizer.tokenize(text)
-  
+
   // Extract content words (nouns, verbs, adjectives)
-  const contentWordMap = new Map<string, number[]>()
+  const contentWordMap = new Map<
+    string,
+    {
+      positions: number[]
+      token: kuromoji.IpadicFeatures
+    }
+  >()
+
   tokens.forEach((token, index) => {
     if (['名詞', '動詞', '形容詞'].includes(token.pos)) {
       const basic = token.basic_form || token.surface_form
-      const positions = contentWordMap.get(basic) || []
-      positions.push(index)
-      contentWordMap.set(basic, positions)
+      const existing = contentWordMap.get(basic)
+      if (existing) {
+        existing.positions.push(index)
+      } else {
+        contentWordMap.set(basic, {
+          positions: [index],
+          token: token,
+        })
+      }
     }
   })
 
@@ -40,10 +53,24 @@ export default function analyze(text: string): AnalysisResult {
   return {
     tokenList: tokens,
     contentWordList: Array.from(contentWordMap.entries()).map(
-      ([basic, positions]) => ({
-        basic,
-        positions,
-      })
+      ([basic, data]) => {
+        const token = data.token
+        return {
+          word_id: token.word_id || 0,
+          word_type: token.word_type || 'KNOWN',
+          pos: token.pos,
+          pos_detail_1: token.pos_detail_1 || '',
+          pos_detail_2: token.pos_detail_2 || '',
+          pos_detail_3: token.pos_detail_3 || '',
+          conjugated_type: token.conjugated_type || '',
+          conjugated_form: token.conjugated_form || '',
+          basic_form: token.basic_form || token.surface_form,
+          reading: token.reading || '',
+          pronunciation: token.pronunciation || '',
+          basic: basic,
+          positions: data.positions,
+        } as ContentWord
+      }
     ),
     kanjiList: Array.from(kanjiSet).map((kanji) => ({ kanji })),
   }

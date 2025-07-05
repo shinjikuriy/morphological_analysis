@@ -1,8 +1,16 @@
 import { render } from 'preact'
-import { useState } from 'preact/hooks'
+import { useState, useEffect } from 'preact/hooks'
 import { AnalysisForm } from './components/AnalysisForm'
-import type { AnalysisResult } from './types'
+import type { AnalysisResult, ContentWord } from './types'
 import { AcquiredItemForm } from './components/AcquiredItemForm'
+import {
+  saveAcquiredKanji,
+  appendAcquiredKanji,
+  loadAcquiredKanji,
+  saveAcquiredWords,
+  loadAcquiredWords,
+  clearAllStorage,
+} from './storage'
 
 function App() {
   const [formResults, setFormResults] = useState<(AnalysisResult | null)[]>([
@@ -11,9 +19,25 @@ function App() {
     null,
   ])
   const [acquiredKanji, setAcquiredKanji] = useState<string[]>([])
-  const [acquiredWords, setAcquiredWords] = useState<AnalysisResult | null>(
-    null
-  )
+  const [acquiredWords, setAcquiredWords] = useState<ContentWord[]>([])
+  const [tooltip, setTooltip] = useState<{
+    text: string
+    x: number
+    y: number
+  } | null>(null)
+
+  // Load data from localStorage on component mount
+  useEffect(() => {
+    const savedKanji = loadAcquiredKanji()
+    const savedWords = loadAcquiredWords()
+
+    if (savedKanji.length > 0) {
+      setAcquiredKanji(savedKanji)
+    }
+    if (savedWords) {
+      setAcquiredWords(savedWords)
+    }
+  }, [])
 
   const handleResultChange =
     (index: number) => (result: AnalysisResult | null) => {
@@ -25,11 +49,32 @@ function App() {
     }
 
   const handleAcquiredKanjiChange = (kanji: string[]) => {
-    setAcquiredKanji(kanji)
+    const updatedKanji = appendAcquiredKanji(kanji)
+    setAcquiredKanji(updatedKanji)
   }
 
   const handleAcquiredWordsChange = (result: AnalysisResult | null) => {
-    setAcquiredWords(result)
+    if (result) {
+      setAcquiredWords(result.contentWordList)
+      saveAcquiredWords(result.contentWordList)
+    } else {
+      setAcquiredWords([])
+      saveAcquiredWords([])
+    }
+  }
+
+  const handleWordHover = (e: MouseEvent, word: any) => {
+    const target = e.currentTarget as HTMLElement
+    const rect = target.getBoundingClientRect()
+    setTooltip({
+      text: JSON.stringify(word, null, 2),
+      x: rect.left,
+      y: rect.bottom + window.scrollY,
+    })
+  }
+
+  const handleWordLeave = () => {
+    setTooltip(null)
   }
 
   // 集計結果の計算
@@ -150,6 +195,17 @@ function App() {
             background: #f0f0f0;
             border-radius: 4px;
           }
+          .clear-button {
+            padding: 0.5rem 1rem;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+          }
+          .clear-button:hover {
+            background: #c82333;
+          }
         `}
       </style>
       <h1>Morph Analysis</h1>
@@ -159,9 +215,21 @@ function App() {
         onAcquiredWordsChange={handleAcquiredWordsChange}
       />
 
-      {(acquiredKanji.length > 0 || acquiredWords) && (
+      {(acquiredKanji.length > 0 || acquiredWords.length > 0) && (
         <div class='acquired-data-display'>
-          <h2>Saved Acquired Data</h2>
+          <div style='display: flex; justify-content: space-between; align-items: center;'>
+            <h2>Saved Acquired Data</h2>
+            <button
+              onClick={() => {
+                clearAllStorage()
+                setAcquiredKanji([])
+                setAcquiredWords([])
+              }}
+              class='clear-button'
+            >
+              Clear All Data
+            </button>
+          </div>
           {acquiredKanji.length > 0 && (
             <div>
               <h3>Acquired Kanji:</h3>
@@ -174,12 +242,17 @@ function App() {
               </div>
             </div>
           )}
-          {acquiredWords && (
+          {acquiredWords.length > 0 && (
             <div>
               <h3>Acquired Words:</h3>
               <div class='acquired-content'>
-                {acquiredWords.contentWordList.map((word, wordIndex) => (
-                  <span key={wordIndex} style='margin-right: 0.5em;'>
+                {acquiredWords.map((word: ContentWord, wordIndex: number) => (
+                  <span
+                    key={wordIndex}
+                    style='margin-right: 0.5em; cursor: help;'
+                    onMouseEnter={(e) => handleWordHover(e, word)}
+                    onMouseLeave={handleWordLeave}
+                  >
                     {word.basic}
                   </span>
                 ))}
@@ -208,6 +281,17 @@ function App() {
           ))}
         </div>
       </div>
+      {tooltip && (
+        <div
+          class='tooltip'
+          style={{
+            left: `${tooltip.x}px`,
+            top: `${tooltip.y}px`,
+          }}
+        >
+          {tooltip.text}
+        </div>
+      )}
     </>
   )
 }
