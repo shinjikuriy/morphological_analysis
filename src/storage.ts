@@ -1,59 +1,59 @@
 import type { AnalysisResult, ContentWord } from './types'
 
 const STORAGE_KEYS = {
-  ACQUIRED_KANJI: 'morphological_analysis_acquired_kanji',
-  ACQUIRED_WORDS: 'morphological_analysis_acquired_words',
+  ACQUIRED_KANJI: 'morphological_analysis_learned_kanji',
+  ACQUIRED_WORDS: 'morphological_analysis_learned_words',
 } as const
 
-export function saveAcquiredKanji(kanji: string[]): void {
+export function saveLearnedKanji(kanji: string[]): void {
   try {
     localStorage.setItem(STORAGE_KEYS.ACQUIRED_KANJI, JSON.stringify(kanji))
   } catch (error) {
-    console.error('Failed to save acquired kanji to localStorage:', error)
+    console.error('Failed to save learned kanji to localStorage:', error)
   }
 }
 
-export function appendAcquiredKanji(newKanji: string[]): string[] {
+export function appendLearnedKanji(newKanji: string[]): string[] {
   try {
-    const existingKanji = loadAcquiredKanji()
+    const existingKanji = loadLearnedKanji()
     const combinedKanji = [...existingKanji, ...newKanji]
     const uniqueKanji = [...new Set(combinedKanji)] // Remove duplicates
-    saveAcquiredKanji(uniqueKanji)
+    saveLearnedKanji(uniqueKanji)
     return uniqueKanji
   } catch (error) {
-    console.error('Failed to append acquired kanji to localStorage:', error)
-    return loadAcquiredKanji()
+    console.error('Failed to append learned kanji to localStorage:', error)
+    return loadLearnedKanji()
   }
 }
 
-export function loadAcquiredKanji(): string[] {
+export function loadLearnedKanji(): string[] {
   try {
     const stored = localStorage.getItem(STORAGE_KEYS.ACQUIRED_KANJI)
     if (stored) {
       return JSON.parse(stored)
     }
   } catch (error) {
-    console.error('Failed to load acquired kanji from localStorage:', error)
+    console.error('Failed to load learned kanji from localStorage:', error)
   }
   return []
 }
 
-export function saveAcquiredWords(words: ContentWord[]): void {
+export function saveLearnedWords(words: ContentWord[]): void {
   try {
     localStorage.setItem(STORAGE_KEYS.ACQUIRED_WORDS, JSON.stringify(words))
   } catch (error) {
-    console.error('Failed to save acquired words to localStorage:', error)
+    console.error('Failed to save learned words to localStorage:', error)
   }
 }
 
-export function loadAcquiredWords(): ContentWord[] {
+export function loadLearnedWords(): ContentWord[] {
   try {
     const stored = localStorage.getItem(STORAGE_KEYS.ACQUIRED_WORDS)
     if (stored) {
       return JSON.parse(stored)
     }
   } catch (error) {
-    console.error('Failed to load acquired words from localStorage:', error)
+    console.error('Failed to load learned words from localStorage:', error)
   }
   return []
 }

@@ -2,13 +2,13 @@ import { render } from 'preact'
 import { useState, useEffect } from 'preact/hooks'
 import { AnalysisForm } from './components/AnalysisForm'
 import type { AnalysisResult, ContentWord } from './types'
-import { AcquiredItemForm } from './components/AcquiredItemForm'
+import { LearnedItemForm } from './components/LearnedItemForm'
 import {
-  saveAcquiredKanji,
-  appendAcquiredKanji,
-  loadAcquiredKanji,
-  saveAcquiredWords,
-  loadAcquiredWords,
+  saveLearnedKanji,
+  appendLearnedKanji,
+  loadLearnedKanji,
+  saveLearnedWords,
+  loadLearnedWords,
   clearAllStorage,
 } from './storage'
 
@@ -18,8 +18,8 @@ function App() {
     null,
     null,
   ])
-  const [acquiredKanji, setAcquiredKanji] = useState<string[]>([])
-  const [acquiredWords, setAcquiredWords] = useState<ContentWord[]>([])
+  const [learnedKanji, setLearnedKanji] = useState<string[]>([])
+  const [learnedWords, setLearnedWords] = useState<ContentWord[]>([])
   const [tooltip, setTooltip] = useState<{
     text: string
     x: number
@@ -28,14 +28,14 @@ function App() {
 
   // Load data from localStorage on component mount
   useEffect(() => {
-    const savedKanji = loadAcquiredKanji()
-    const savedWords = loadAcquiredWords()
+    const savedKanji = loadLearnedKanji()
+    const savedWords = loadLearnedWords()
 
     if (savedKanji.length > 0) {
-      setAcquiredKanji(savedKanji)
+      setLearnedKanji(savedKanji)
     }
     if (savedWords) {
-      setAcquiredWords(savedWords)
+      setLearnedWords(savedWords)
     }
   }, [])
 
@@ -48,18 +48,18 @@ function App() {
       })
     }
 
-  const handleAcquiredKanjiChange = (kanji: string[]) => {
-    const updatedKanji = appendAcquiredKanji(kanji)
-    setAcquiredKanji(updatedKanji)
+  const handleLearnedKanjiChange = (kanji: string[]) => {
+    const updatedKanji = appendLearnedKanji(kanji)
+    setLearnedKanji(updatedKanji)
   }
 
-  const handleAcquiredWordsChange = (result: AnalysisResult | null) => {
+  const handleLearnedWordsChange = (result: AnalysisResult | null) => {
     if (result) {
-      setAcquiredWords(result.contentWordList)
-      saveAcquiredWords(result.contentWordList)
+      setLearnedWords(result.contentWordList)
+      saveLearnedWords(result.contentWordList)
     } else {
-      setAcquiredWords([])
-      saveAcquiredWords([])
+      setLearnedWords([])
+      saveLearnedWords([])
     }
   }
 
@@ -152,24 +152,24 @@ function App() {
             background: #f0f0f0;
             border-radius: 4px;
           }
-          .acquired-forms-container {
+          .learned-forms-container {
             display: flex;
             gap: 2rem;
             padding: 1rem;
             margin-bottom: 2rem;
           }
-          .acquired-form {
+          .learned-form {
             flex: 1;
             min-width: 0;
             padding: 1rem;
             border: 1px solid #ccc;
             border-radius: 4px;
           }
-          .acquired-form h3 {
+          .learned-form h3 {
             margin-top: 0;
             margin-bottom: 1rem;
           }
-          .acquired-form button {
+          .learned-form button {
             margin-top: 0.5rem;
             padding: 0.5rem 1rem;
             background: #007bff;
@@ -178,18 +178,18 @@ function App() {
             border-radius: 4px;
             cursor: pointer;
           }
-          .acquired-form button:hover {
+          .learned-form button:hover {
             background: #0056b3;
           }
-          .acquired-data-display {
+          .learned-data-display {
             margin-top: 2rem;
             padding: 1rem;
             border-top: 2px solid #ccc;
           }
-          .acquired-data-display h2 {
+          .learned-data-display h2 {
             margin-top: 1rem;
           }
-          .acquired-content {
+          .learned-content {
             margin-top: 0.5rem;
             padding: 0.5rem;
             background: #f0f0f0;
@@ -210,31 +210,31 @@ function App() {
       </style>
       <h1>Morph Analysis</h1>
 
-      <AcquiredItemForm
-        onAcquiredKanjiChange={handleAcquiredKanjiChange}
-        onAcquiredWordsChange={handleAcquiredWordsChange}
+      <LearnedItemForm
+        onLearnedKanjiChange={handleLearnedKanjiChange}
+        onLearnedWordsChange={handleLearnedWordsChange}
       />
 
-      {(acquiredKanji.length > 0 || acquiredWords.length > 0) && (
-        <div class='acquired-data-display'>
+      {(learnedKanji.length > 0 || learnedWords.length > 0) && (
+        <div class='learned-data-display'>
           <div style='display: flex; justify-content: space-between; align-items: center;'>
-            <h2>Saved Acquired Data</h2>
+            <h2>Saved Learned Data</h2>
             <button
               onClick={() => {
                 clearAllStorage()
-                setAcquiredKanji([])
-                setAcquiredWords([])
+                setLearnedKanji([])
+                setLearnedWords([])
               }}
               class='clear-button'
             >
               Clear All Data
             </button>
           </div>
-          {acquiredKanji.length > 0 && (
+          {learnedKanji.length > 0 && (
             <div>
-              <h3>Acquired Kanji:</h3>
-              <div class='acquired-content'>
-                {acquiredKanji.map((kanji, index) => (
+              <h3>Learned Kanji:</h3>
+              <div class='learned-content'>
+                {learnedKanji.map((kanji, index) => (
                   <span key={index} style='margin-right: 0.5em;'>
                     {kanji}
                   </span>
@@ -242,11 +242,11 @@ function App() {
               </div>
             </div>
           )}
-          {acquiredWords.length > 0 && (
+          {learnedWords.length > 0 && (
             <div>
-              <h3>Acquired Words:</h3>
-              <div class='acquired-content'>
-                {acquiredWords.map((word: ContentWord, wordIndex: number) => (
+              <h3>Learned Words:</h3>
+              <div class='learned-content'>
+                {learnedWords.map((word: ContentWord, wordIndex: number) => (
                   <span
                     key={wordIndex}
                     style='margin-right: 0.5em; cursor: help;'

@@ -1,15 +1,15 @@
 import { useState } from 'preact/hooks'
 import type { AnalysisResult } from '../types'
 
-interface AcquiredItemFormProps {
-  onAcquiredKanjiChange: (kanji: string[]) => void
-  onAcquiredWordsChange: (result: AnalysisResult | null) => void
+interface LearnedItemFormProps {
+  onLearnedKanjiChange: (kanji: string[]) => void
+  onLearnedWordsChange: (result: AnalysisResult | null) => void
 }
 
-export function AcquiredItemForm({
-  onAcquiredKanjiChange,
-  onAcquiredWordsChange,
-}: AcquiredItemFormProps) {
+export function LearnedItemForm({
+  onLearnedKanjiChange,
+  onLearnedWordsChange,
+}: LearnedItemFormProps) {
   const [kanjiInput, setKanjiInput] = useState('')
   const [wordsInput, setWordsInput] = useState('')
 
@@ -26,7 +26,7 @@ export function AcquiredItemForm({
       .filter((char) => kanjiRegex.test(char)) // Filter CJK characters only
       .filter((char, index, array) => array.indexOf(char) === index) // Remove duplicates
 
-    onAcquiredKanjiChange(kanjiArray)
+    onLearnedKanjiChange(kanjiArray)
     setKanjiInput('') // Clear the input after saving
   }
 
@@ -34,7 +34,7 @@ export function AcquiredItemForm({
     e.preventDefault()
 
     if (!wordsInput.trim()) {
-      onAcquiredWordsChange(null)
+      onLearnedWordsChange(null)
       return
     }
 
@@ -49,46 +49,46 @@ export function AcquiredItemForm({
 
       if (response.ok) {
         const result: AnalysisResult = await response.json()
-        onAcquiredWordsChange(result)
+        onLearnedWordsChange(result)
       } else {
         console.error('Failed to analyze text')
-        onAcquiredWordsChange(null)
+        onLearnedWordsChange(null)
       }
     } catch (error) {
       console.error('Error analyzing text:', error)
-      onAcquiredWordsChange(null)
+      onLearnedWordsChange(null)
     }
   }
 
   return (
-    <div class='acquired-forms-container'>
-      <div class='acquired-form'>
-        <h3>Acquired Kanji</h3>
+    <div class='learned-forms-container'>
+      <div class='learned-form'>
+        <h3>Learned Kanji</h3>
         <form onSubmit={handleKanjiSubmit}>
           <textarea
             class='text-input'
-            placeholder='Enter acquired kanji...'
+            placeholder='Enter learned kanji...'
             value={kanjiInput}
             onInput={(e) =>
               setKanjiInput((e.target as HTMLTextAreaElement).value)
             }
           />
-          <button type='submit'>Save Acquired Kanji</button>
+          <button type='submit'>Save Learned Kanji</button>
         </form>
       </div>
 
-      <div class='acquired-form'>
-        <h3>Acquired Words</h3>
+      <div class='learned-form'>
+        <h3>Learned Words</h3>
         <form onSubmit={handleWordsSubmit}>
           <textarea
             class='text-input'
-            placeholder='Enter acquired words...'
+            placeholder='Enter learned words...'
             value={wordsInput}
             onInput={(e) =>
               setWordsInput((e.target as HTMLTextAreaElement).value)
             }
           />
-          <button type='submit'>Save Acquired Words</button>
+          <button type='submit'>Save Learned Words</button>
         </form>
       </div>
     </div>
