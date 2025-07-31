@@ -79,17 +79,29 @@ function App() {
 
   // 集計結果の計算
   const aggregatedResults = {
-    contentWords: new Set<string>(),
-    kanjis: new Set<string>(),
+    contentWords: new Map<string, boolean>(),
+    kanjis: new Map<string, boolean>(),
   }
 
   formResults.forEach((result) => {
     if (result) {
       result.contentWordList.forEach((word) => {
-        aggregatedResults.contentWords.add(word.basic)
+        // If word already exists, keep the learned status if either is learned
+        const existingLearned =
+          aggregatedResults.contentWords.get(word.basic) || false
+        aggregatedResults.contentWords.set(
+          word.basic,
+          existingLearned || word.isLearned || false
+        )
       })
       result.kanjiList.forEach((kanji) => {
-        aggregatedResults.kanjis.add(kanji.kanji)
+        // If kanji already exists, keep the learned status if either is learned
+        const existingLearned =
+          aggregatedResults.kanjis.get(kanji.kanji) || false
+        aggregatedResults.kanjis.set(
+          kanji.kanji,
+          existingLearned || kanji.isLearned || false
+        )
       })
     }
   })
@@ -263,22 +275,58 @@ function App() {
       )}
 
       <div class='analysis-forms-container'>
-        <AnalysisForm onResultChange={handleResultChange(0)} />
-        <AnalysisForm onResultChange={handleResultChange(1)} />
-        <AnalysisForm onResultChange={handleResultChange(2)} />
+        <AnalysisForm
+          onResultChange={handleResultChange(0)}
+          learnedKanji={learnedKanji}
+          learnedWords={learnedWords}
+        />
+        <AnalysisForm
+          onResultChange={handleResultChange(1)}
+          learnedKanji={learnedKanji}
+          learnedWords={learnedWords}
+        />
+        <AnalysisForm
+          onResultChange={handleResultChange(2)}
+          learnedKanji={learnedKanji}
+          learnedWords={learnedWords}
+        />
       </div>
       <div class='aggregated-results'>
         <h2>Aggregated Content Words</h2>
         <div class='content-words'>
-          {Array.from(aggregatedResults.contentWords).map((word, index) => (
-            <span key={index}>{word}</span>
-          ))}
+          {Array.from(aggregatedResults.contentWords.entries()).map(
+            ([word, isLearned], index) => (
+              <span
+                key={index}
+                style={{
+                  backgroundColor: isLearned ? '#90EE90' : '#f0f0f0',
+                  padding: '0.25rem 0.5rem',
+                  borderRadius: '4px',
+                  marginRight: '0.5rem',
+                }}
+              >
+                {word}
+              </span>
+            )
+          )}
         </div>
         <h2>Aggregated Kanji</h2>
         <div class='kanjis'>
-          {Array.from(aggregatedResults.kanjis).map((kanji, index) => (
-            <span key={index}>{kanji}</span>
-          ))}
+          {Array.from(aggregatedResults.kanjis.entries()).map(
+            ([kanji, isLearned], index) => (
+              <span
+                key={index}
+                style={{
+                  backgroundColor: isLearned ? '#90EE90' : '#f0f0f0',
+                  padding: '0.25rem 0.5rem',
+                  borderRadius: '4px',
+                  marginRight: '0.5rem',
+                }}
+              >
+                {kanji}
+              </span>
+            )
+          )}
         </div>
       </div>
       {tooltip && (

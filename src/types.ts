@@ -16,10 +16,12 @@ export interface ContentWord {
   pronunciation: string
   basic: string
   positions: number[]
+  isLearned?: boolean
 }
 
 export interface Kanji {
   kanji: string
+  isLearned?: boolean
 }
 
 export interface AnalysisResult {

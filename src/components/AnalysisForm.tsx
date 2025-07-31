@@ -1,11 +1,17 @@
 import { useState, useId, useEffect } from 'preact/hooks'
-import type { AnalysisResult } from '../types'
+import type { AnalysisResult, ContentWord } from '../types'
 
 interface AnalysisFormProps {
   onResultChange?: (result: AnalysisResult | null) => void
+  learnedKanji?: string[]
+  learnedWords?: ContentWord[]
 }
 
-export function AnalysisForm({ onResultChange }: AnalysisFormProps) {
+export function AnalysisForm({
+  onResultChange,
+  learnedKanji = [],
+  learnedWords = [],
+}: AnalysisFormProps) {
   const [text, setText] = useState('')
   const [result, setResult] = useState<AnalysisResult | null>(null)
   const [tooltip, setTooltip] = useState<{
@@ -37,7 +43,23 @@ export function AnalysisForm({ onResultChange }: AnalysisFormProps) {
     if (response.ok) {
       const data = await response.json()
       console.log(data)
-      setResult(data)
+
+      // Add isLearned property to kanji and content words
+      const processedData: AnalysisResult = {
+        ...data,
+        kanjiList: data.kanjiList.map((kanji: any) => ({
+          ...kanji,
+          isLearned: learnedKanji.includes(kanji.kanji),
+        })),
+        contentWordList: data.contentWordList.map((word: any) => ({
+          ...word,
+          isLearned: learnedWords.some(
+            (learnedWord) => learnedWord.basic === word.basic
+          ),
+        })),
+      }
+
+      setResult(processedData)
     } else {
       setResult(null)
     }
@@ -87,13 +109,33 @@ export function AnalysisForm({ onResultChange }: AnalysisFormProps) {
           <h2>Content Words</h2>
           <div class='content-words'>
             {result.contentWordList.map((word, index) => (
-              <span key={index}>{word.basic}</span>
+              <span
+                key={index}
+                style={{
+                  backgroundColor: word.isLearned ? '#90EE90' : '#f0f0f0',
+                  padding: '0.25rem 0.5rem',
+                  borderRadius: '4px',
+                  marginRight: '0.5rem',
+                }}
+              >
+                {word.basic}
+              </span>
             ))}
           </div>
           <h2>Kanji</h2>
           <div class='kanjis'>
             {result.kanjiList.map((kanji, index) => (
-              <span key={index}>{kanji.kanji}</span>
+              <span
+                key={index}
+                style={{
+                  backgroundColor: kanji.isLearned ? '#90EE90' : '#f0f0f0',
+                  padding: '0.25rem 0.5rem',
+                  borderRadius: '4px',
+                  marginRight: '0.5rem',
+                }}
+              >
+                {kanji.kanji}
+              </span>
             ))}
           </div>
         </div>
